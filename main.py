@@ -89,6 +89,7 @@ def mark_done_today(hid):
         conn.close()
         print(ex)
 
+
 main_cli.add_command(new_habit)
 main_cli.add_command(show_all)
 main_cli.add_command(mark_done_today)

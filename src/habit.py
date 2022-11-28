@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 import sqlite3
-from enum import auto
 
 from tabulate import tabulate
 
@@ -115,7 +114,7 @@ class Habit:
            cur = conn.cursor()
            print('connected...')
            habit_data = [
-               (None,self.habit, self.description, self.period, self.duration, self.created, self.closed, self.last_completion_date, self.is_template)
+               (self.habits_id,self.habit, self.description, self.period, self.duration, self.created, self.closed, self.last_completion_date, self.is_template)
            ]
            cur.executemany("""INSERT INTO habits  VALUES (?,?,?,?,?,?,?,?,?)""", habit_data)
         except ConnectionError as ex:
