@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import sqlite3
+from enum import auto
 
 from tabulate import tabulate
 
@@ -7,7 +8,6 @@ from tabulate import tabulate
 def connect_db():
         try:
             conn = sqlite3.connect('habit.db')
-           # c = conn.cursor()
 
         except ConnectionError as ex:
             print(ex)
@@ -16,7 +16,6 @@ def connect_db():
 
 class Habit:
     periods = {1:'daily', 2:'weekly', 3:'monthly', 4:'yearly'}
-
 
     def __init__(self, habit, description, period, duration=60,is_template=0):
 
@@ -37,12 +36,27 @@ class Habit:
         self.completed = False
         self.closed = False
         self.last_completion_date = None
-        self.habits_id = None
         self.is_template = is_template
+        self.habits_id = None
+        self.habits_id = self.get_habits_id()
 
         # check if the Habit is still open
         status = self.check_duration()
         print(status)
+    def get_habits_id(self):
+        if self.habits_id is None:
+            # connect to DB and get current record
+            try:
+               conn = connect_db()
+               cur = conn.cursor()
+            except ConnectionError as ex:
+                print(ex)
+            rs = cur.execute("""SELECT MAX(habits_id) FROM habits """)
+            nxt = rs.fetchone()[0]
+            nxt += 1
+            print(nxt)
+            return nxt
+        return self.habits_id
 
     def mark_completed(self):
         # connect to DB and get current record
@@ -59,10 +73,8 @@ class Habit:
         try:
            cur.execute(""" UPDATE habits SET last_completion_date = ? WHERE name = ? """, (self.last_completion_date,self.habit))
            conn.commit()
-           print('commit...')
            # close connection
            conn.close()
-           print('connection closed...')
         except ConnectionError as ex:
             print(ex)
 
@@ -125,18 +137,20 @@ class Habit:
             print(ex)
         return rs.fetchone()
 
+
 def show_all_habits():
     table_format = 'fancy_outline'
-    first_row = ['name','description','periode','duration','last_completion_date']
+    first_row = ['id', 'name', 'description', 'period', 'duration', 'last_completion_date']
     try:
         conn = connect_db()
         cur = conn.cursor()
-        rs = cur.execute(""" SELECT name,description,periods_fk,duration,last_completion_date FROM habits WHERE closed == FALSE""")
+        rs = cur.execute(
+            """ SELECT habits_id,name,description,periods_fk,duration,last_completion_date FROM habits WHERE closed == FALSE""")
     except ConnectionError as ex:
-            print(ex)
+        print(ex)
 
     rows = list(rs.fetchall())
-    return tabulate(rows,headers= first_row,tablefmt=table_format)
+    print(tabulate(rows, headers=first_row, tablefmt=table_format))
 
 
 
