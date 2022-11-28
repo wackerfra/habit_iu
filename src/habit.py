@@ -108,6 +108,7 @@ class Habit:
             print(self.habit)
             print(ex)
 
+
     def save_to_db(self):
         try:
            conn = connect_db()

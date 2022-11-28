@@ -7,6 +7,8 @@ from src.habit import connect_db, show_all_habits
 def analytic_group():
     """ Commands for your analysis"""
 
+
+
 @click.command(name='all')
 def show_all():
     pass
