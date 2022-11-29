@@ -145,7 +145,8 @@ def show_all_habits():
         conn = connect_db()
         cur = conn.cursor()
         rs = cur.execute(
-            """ SELECT habits_id,name,description,periods_fk,duration,last_completion_date FROM habits WHERE closed == FALSE""")
+            """ SELECT habits_id,name,description,periods_fk,duration,last_completion_date FROM habits 
+            WHERE closed == FALSE ORDER BY habits_id ASC """)
     except ConnectionError as ex:
         print(ex)
 
