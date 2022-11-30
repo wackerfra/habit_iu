@@ -2,9 +2,11 @@ import sqlite3
 from datetime import datetime
 
 import click
+from tabulate import tabulate
 
 import src.habit as ha
-from src.analytics import analytic_group, get_cursor, show_all_habits
+from src.analytics import analytic_group, get_cursor
+from src.analytics import show_all_habits as alle
 
 
 def connect_db():
@@ -56,7 +58,22 @@ def new_habit(name, description, period):
     new = ha.Habit(name, description, period)
     new.save_to_db()
 
+@click.command(name='all-habits')
+def show_all():
+    """ show all habits in the database  """
+    table_format = 'fancy_outline'
+    first_row = ['id', 'name', 'description', 'period', 'duration in days']
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+        rs = cur.execute(
+            """ SELECT DISTINCT h.habits_id,h.name,h.description,p.name,h.duration FROM habits as h 
+            INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE ORDER BY habits_id ASC """)
+    except ConnectionError as ex:
+        print(ex)
 
+    rows = list(rs.fetchall())
+    print(tabulate(rows, headers=first_row, tablefmt=table_format))
 @click.command(name='mark-completed')
 @click.argument("hid", type=click.IntRange(1))
 def mark_done_today(hid):
@@ -94,7 +111,7 @@ def mark_done_today(hid):
         conn.close()
         print(ex)
 
-
+main_cli.add_command(show_all)
 main_cli.add_command(new_habit)
 main_cli.add_command(mark_done_today)
 main_cli.add_command(analytic_group)

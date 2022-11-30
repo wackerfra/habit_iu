@@ -18,7 +18,7 @@ def get_cursor():
 @click.group(name="analytics")
 def analytic_group():
     """ Commands for your analysis"""
-@click.command(name='all')
+@click.command(name='all-habits')
 def show_all_habits():
     table_format = 'fancy_outline'
     first_row = ['id', 'name', 'description', 'period', 'duration in days']
@@ -34,9 +34,98 @@ def show_all_habits():
     rows = list(rs.fetchall())
     print(tabulate(rows, headers=first_row, tablefmt=table_format))
 
+
+@click.command(name='list-all-activities')
+def show_all_activities():
+    table_format = 'fancy_outline'
+    first_row = ['id', 'name', 'description', 'period', 'duration in days', 'last completion date']
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+        rs = cur.execute(
+            """ SELECT  h.habits_id,h.name,h.description,p.name,h.duration, h.last_completion_date FROM habits as h 
+            INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE ORDER BY habits_id ASC, last_completion_date DESC """)
+
+    except ConnectionError as ex:
+        print(ex)
+
+    rows = list(rs.fetchall())
+    print(tabulate(rows, headers=first_row, tablefmt=table_format))
+
 @click.command(name='streak-all')
 def longest_streak_all():
-    pass
+    dateformat = "%Y-%m-%d %H:%M:%S"
+    streak = 1
+    longest = 1
+    h_name = None
+    long_streak = None
+    long_habit = None
+    try:
+        cur = get_cursor()
+        rs = cur.execute(
+            """ SELECT habits_id, name,periods_fk, last_completion_date FROM habits WHERE last_completion_date not null ORDER BY habits_id ASC """)
+        rows = rs.fetchall()
+    except sqlite3.Error as ex:
+        print(ex)
+    # data = rows[0]
+
+
+    for row in rows:
+        print(row)
+        first_compl = row[3]
+        habit_name = row[1]
+        period = row[2]
+        if habit_name != h_name:
+            #TODO: fix rember the longest streak
+            long_streak = streak
+            long_habit = h_name
+            streak = 1
+            longest = 1
+        if streak > longest:
+            longest = streak
+        match period:
+            case 1:
+                first = datetime.strptime(first_compl, dateformat)
+                current = datetime.strptime(row[3], dateformat)
+                delta = current - first
+                h_name = habit_name
+                if delta.days <= 1:
+                    streak += 1
+                else:
+                    streak = 0
+                    continue
+            case 2:
+                first = datetime.strptime(first_compl, dateformat)
+                current = datetime.strptime(row[3], dateformat)
+                delta = current - first
+                h_name = habit_name
+                if delta.days <= 7:
+                    streak += 1
+                else:
+                    streak = 0
+                    continue
+            case 3:
+                first = datetime.strptime(first_compl, dateformat)
+                current = datetime.strptime(row[3], dateformat)
+                delta = current - first
+                h_name = habit_name
+                if delta.days <= 30:
+                    streak += 1
+                else:
+                    streak = 0
+                    continue
+            case 4:
+                first = datetime.strptime(first_compl, dateformat)
+                current = datetime.strptime(row[3], dateformat)
+                delta = current - first
+                h_name = habit_name
+                if delta.days <= 365:
+                    streak += 1
+                else:
+                    streak = 0
+                    continue
+
+    print(f'The longest streak is for your habit {long_habit}  {long_streak} times')
 
 @click.command(name='streak')
 @click.argument('habit_id', type= click.IntRange(1))
@@ -114,6 +203,7 @@ def same_periodicy(period):
 
 
 analytic_group.add_command(show_all_habits)
+analytic_group.add_command(show_all_activities)
 analytic_group.add_command(longest_streak_all)
 analytic_group.add_command(longest_streak_habit)
 analytic_group.add_command(same_periodicy)
