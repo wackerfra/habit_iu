@@ -5,7 +5,7 @@ import sqlite3
 
 from tabulate import tabulate
 
-from src.habit import connect_db, show_all_habits
+from src.habit import connect_db
 
 
 def get_cursor():
@@ -18,12 +18,21 @@ def get_cursor():
 @click.group(name="analytics")
 def analytic_group():
     """ Commands for your analysis"""
-
-
-
 @click.command(name='all')
-def show_all():
-    show_all_habits()
+def show_all_habits():
+    table_format = 'fancy_outline'
+    first_row = ['id', 'name', 'description', 'period', 'duration in days']
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+        rs = cur.execute(
+            """ SELECT DISTINCT h.habits_id,h.name,h.description,p.name,h.duration FROM habits as h 
+            INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE ORDER BY habits_id ASC """)
+    except ConnectionError as ex:
+        print(ex)
+
+    rows = list(rs.fetchall())
+    print(tabulate(rows, headers=first_row, tablefmt=table_format))
 
 @click.command(name='streak-all')
 def longest_streak_all():
@@ -103,7 +112,8 @@ def same_periodicy(period):
     rows = list(rs.fetchall())
     print(tabulate(rows, headers=first_row, tablefmt=table_format))
 
-analytic_group.add_command(show_all)
+
+analytic_group.add_command(show_all_habits)
 analytic_group.add_command(longest_streak_all)
 analytic_group.add_command(longest_streak_habit)
 analytic_group.add_command(same_periodicy)

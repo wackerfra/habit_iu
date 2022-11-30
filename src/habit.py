@@ -9,6 +9,7 @@ def connect_db():
             conn = sqlite3.connect('habit.db')
 
         except ConnectionError as ex:
+            conn = None
             print(ex)
 
         return conn
@@ -49,33 +50,35 @@ class Habit:
                conn = connect_db()
                cur = conn.cursor()
             except ConnectionError as ex:
+                conn.close()
                 print(ex)
             rs = cur.execute("""SELECT MAX(habits_id) FROM habits """)
             nxt = rs.fetchone()[0]
             nxt += 1
-            print(nxt)
+            conn.close()
             return nxt
         return self.habits_id
 
-    def mark_completed(self):
-        # connect to DB and get current record
-        try:
-           conn = connect_db()
-           cur = conn.cursor()
-        except ConnectionError as ex:
-            print(ex)
-        if self.last_completion_date.strftime("%Y-%m-%d") == datetime.now().strftime(
-                "%Y-%m-%d"):
-            raise ValueError('The habit is already completed today')
-        self.last_completion_date = datetime.strptime(datetime.now().strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
-       # update record
-        try:
-           cur.execute(""" UPDATE habits SET last_completion_date = ? WHERE name = ? """, (self.last_completion_date,self.habit))
-           conn.commit()
-           # close connection
-           conn.close()
-        except ConnectionError as ex:
-            print(ex)
+    # def mark_completed(self):
+    #     # connect to DB and get current record
+    #     try:
+    #        conn = connect_db()
+    #        cur = conn.cursor()
+    #     except ConnectionError as ex:
+    #         print(ex)
+    #     if self.last_completion_date.strftime("%Y-%m-%d") == datetime.now().strftime(
+    #             "%Y-%m-%d"):
+    #         raise ValueError('The habit is already completed today')
+    #     self.last_completion_date = datetime.strptime(datetime.now().strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
+    #    # update record
+    #     try:
+    #        cur.execute(""" UPDATE habits SET last_completion_date = ? WHERE name = ? """, (self.last_completion_date,self.habit))
+    #        conn.commit()
+    #        # close connection
+    #        conn.close()
+    #     except ConnectionError as ex:
+    #         conn.close()
+    #         print(ex)
 
 
     def check_duration(self):
@@ -91,6 +94,7 @@ class Habit:
                # close connection
                conn.close()
             except ConnectionError as ex:
+                conn.close()
                 print(ex)
         return f'You have {self.duration - diff_days} days left to complete the task'
 
@@ -101,9 +105,10 @@ class Habit:
 
            cur.execute("""DELETE FROM habits  WHERE habits_id = ?""", self.habits_id)
            conn.commit()
-               # close connection
+            # close connection
            conn.close()
         except ConnectionError as ex:
+            conn.close()
             print(self.habit)
             print(ex)
 
@@ -128,30 +133,20 @@ class Habit:
             print(ex)
 
 
-    def read_habit(self, hid):
-        try:
-           conn = connect_db()
-           cur = conn.cursor()
-           rs = cur.execute(""" SELECT * FROM habits WHERE habits_id = ? """, hid)
-        except ConnectionError as ex:
-            print(ex)
-        return rs.fetchone()
-
-
-def show_all_habits():
-    table_format = 'fancy_outline'
-    first_row = ['id', 'name', 'description', 'period', 'duration', 'last_completion_date']
-    try:
-        conn = connect_db()
-        cur = conn.cursor()
-        rs = cur.execute(
-            """ SELECT habits_id,name,description,periods_fk,duration,last_completion_date FROM habits 
-            WHERE closed == FALSE ORDER BY habits_id ASC """)
-    except ConnectionError as ex:
-        print(ex)
-
-    rows = list(rs.fetchall())
-    print(tabulate(rows, headers=first_row, tablefmt=table_format))
+# def show_all_habits():
+#     table_format = 'fancy_outline'
+#     first_row = ['id', 'name', 'description', 'period', 'duration in days']
+#     try:
+#         conn = connect_db()
+#         cur = conn.cursor()
+#         rs = cur.execute(
+#             """ SELECT DISTINCT h.habits_id,h.name,h.description,p.name,duration FROM habits as h
+#             INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE ORDER BY habits_id ASC """)
+#     except ConnectionError as ex:
+#         print(ex)
+#
+#     rows = list(rs.fetchall())
+#     print(tabulate(rows, headers=first_row, tablefmt=table_format))
 
 
 
