@@ -26,7 +26,7 @@ You can create a new individual habit by typing <<< habit new >>> with the follo
 --name or -n for the short name of the habit
 --description or -d for a description of the habit
 --period or -p for the period how often you repeat the habit as integer 1=daily, 2=weekly, 3=monthly, 4=yearly
-for example <<< habit new -n "dentist" -d "have my teeth checked" -p 4 >>> use double quptes for the string parameters
+for example <<< habit new -n "dentist" -d "have my teeth checked" -p 4 >>> use double quotes for the string parameters
 
 or copy a habit from a example habit using
 TODO
