@@ -12,7 +12,7 @@ The response should be Python 3.10.X or above
 Additionally pip is required to install additional packages. 
 To install pip follow the instructions on https://pip.pypa.io/en/stable/installation/
 
-Run: <<< pip install . >>> (Don't ignore the whitespace dot)  
+Run: <<< pip install . >>> (Don't ignore the whitespace and dot)  
 To complete the installation run <<< pip install -r requirements.txt >>>
 This will install all additional packages required for the app. 
 
