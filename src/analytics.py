@@ -58,8 +58,7 @@ def longest_streak_all():
     streak = 1
     longest = 1
     h_name = None
-    long_streak = None
-    long_habit = None
+    max_habit = None
     try:
         cur = get_cursor()
         rs = cur.execute(
@@ -67,22 +66,17 @@ def longest_streak_all():
         rows = rs.fetchall()
     except sqlite3.Error as ex:
         print(ex)
-    # data = rows[0]
-
 
     for row in rows:
-        print(row)
+        # print(row)
         first_compl = row[3]
         habit_name = row[1]
         period = row[2]
         if habit_name != h_name:
-            #TODO: fix rember the longest streak
-            long_streak = streak
-            long_habit = h_name
             streak = 1
-            longest = 1
         if streak > longest:
             longest = streak
+            max_habit = h_name
         match period:
             case 1:
                 first = datetime.strptime(first_compl, dateformat)
@@ -125,7 +119,7 @@ def longest_streak_all():
                     streak = 0
                     continue
 
-    print(f'The longest streak is for your habit {long_habit}  {long_streak} times')
+    print(f'The longest streak is for your habit {max_habit} with {longest} times')
 
 @click.command(name='streak')
 @click.argument('habit_id', type= click.IntRange(1))
