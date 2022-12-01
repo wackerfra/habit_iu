@@ -59,26 +59,7 @@ class Habit:
             return nxt
         return self.habits_id
 
-    # def mark_completed(self):
-    #     # connect to DB and get current record
-    #     try:
-    #        conn = connect_db()
-    #        cur = conn.cursor()
-    #     except ConnectionError as ex:
-    #         print(ex)
-    #     if self.last_completion_date.strftime("%Y-%m-%d") == datetime.now().strftime(
-    #             "%Y-%m-%d"):
-    #         raise ValueError('The habit is already completed today')
-    #     self.last_completion_date = datetime.strptime(datetime.now().strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
-    #    # update record
-    #     try:
-    #        cur.execute(""" UPDATE habits SET last_completion_date = ? WHERE name = ? """, (self.last_completion_date,self.habit))
-    #        conn.commit()
-    #        # close connection
-    #        conn.close()
-    #     except ConnectionError as ex:
-    #         conn.close()
-    #         print(ex)
+
 
 
     def check_duration(self):

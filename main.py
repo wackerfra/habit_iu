@@ -5,8 +5,7 @@ import click
 from tabulate import tabulate
 
 import src.habit as ha
-from src.analytics import analytic_group, get_cursor
-from src.analytics import show_all_habits as alle
+from src.analytics import analytic_group
 
 
 def connect_db():
@@ -57,6 +56,47 @@ def new_habit(name, description, period):
     """
     new = ha.Habit(name, description, period)
     new.save_to_db()
+@click.command(name='new-from-template')
+def new_template():
+    """ create a new habit from a template """
+
+    table_format = 'fancy_outline'
+    first_row = ['id', 'name', 'description', 'period', 'duration in days']
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+        rs = cur.execute(
+            """ SELECT h.habits_id,h.name,h.description,p.name,h.duration FROM habits as h 
+            INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE is_template == TRUE ORDER BY habits_id ASC """)
+    except ConnectionError as ex:
+        print(ex)
+
+
+    rows = list(rs.fetchall())
+    print(tabulate(rows, headers=first_row, tablefmt=table_format))
+
+    userinput = int(input("Enter the ID of the habit you want to create.\n"))
+    try:
+        for row in rows:
+            if row[0] == userinput:
+                match row[3]:
+                    case 'daily':
+                        period = 1
+                    case 'weekly':
+                        period = 2
+                    case 'monthly':
+                        period = 3
+                    case 'yearly':
+                        period = 4
+                new = ha.Habit(row[1], row[2], period)
+                new.save_to_db()
+                print("Habit created.")
+                break
+            else:
+                continue
+    except ValueError as ex:
+        print('ID not found. \n' + ex)
+
 
 @click.command(name='all-habits')
 def show_all():
@@ -68,7 +108,8 @@ def show_all():
         cur = conn.cursor()
         rs = cur.execute(
             """ SELECT DISTINCT h.habits_id,h.name,h.description,p.name,h.duration FROM habits as h 
-            INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE ORDER BY habits_id ASC """)
+            INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE AND is_template == FALSE 
+            ORDER BY habits_id ASC """)
     except ConnectionError as ex:
         print(ex)
 
@@ -113,6 +154,7 @@ def mark_done_today(hid):
 
 main_cli.add_command(show_all)
 main_cli.add_command(new_habit)
+main_cli.add_command(new_template)
 main_cli.add_command(mark_done_today)
 main_cli.add_command(analytic_group)
 
