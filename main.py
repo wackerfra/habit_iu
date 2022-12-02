@@ -62,6 +62,7 @@ def new_template():
 
     table_format = 'fancy_outline'
     first_row = ['id', 'name', 'description', 'period', 'duration in days']
+    created = False
     try:
         conn = connect_db()
         cur = conn.cursor()
@@ -91,12 +92,15 @@ def new_template():
                 new = ha.Habit(row[1], row[2], period)
                 new.save_to_db()
                 print("Habit created.")
+                created = True
                 break
             else:
                 continue
+
     except ValueError as ex:
         print('ID not found. \n' + ex)
-
+    if created == False:
+        print("Habit ID not found. \nPlease try again.")
 
 @click.command(name='all-habits')
 def show_all():
