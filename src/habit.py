@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
 import sqlite3
 
-from tabulate import tabulate
-
 
 def connect_db():
         try:
@@ -44,6 +42,8 @@ class Habit:
         status = self.check_duration()
         print(status)
     def get_habits_id(self):
+        """ get the habits_id from the database """
+
         if self.habits_id is None:
             # connect to DB and get current record
             try:
@@ -60,9 +60,9 @@ class Habit:
         return self.habits_id
 
 
-
-
     def check_duration(self):
+        """ check if the habit is still open """
+
         diff = datetime.now() - self.created
         diff_days = int(diff / timedelta(days=1))
         if self.duration <= diff_days and self.closed == False:
@@ -70,7 +70,7 @@ class Habit:
             conn = connect_db()
             cur = conn.cursor()
             try:
-               cur.execute(""" UPDATE habits SET closed = 1 WHERE habits_id = ? """, self.habits_id)
+               cur.execute(""" UPDATE habits SET closed = 1 WHERE habits_id = ?""", self.habits_id)
                conn.commit()
                # close connection
                conn.close()
@@ -79,26 +79,12 @@ class Habit:
                 print(ex)
         return f'You have {self.duration - diff_days} days left to complete the task'
 
-    def delete_habit(self):
-        try:
-           conn = connect_db()
-           cur = conn.cursor()
-
-           cur.execute("""DELETE FROM habits  WHERE habits_id = ?""", self.habits_id)
-           conn.commit()
-            # close connection
-           conn.close()
-        except ConnectionError as ex:
-            conn.close()
-            print(self.habit)
-            print(ex)
-
 
     def save_to_db(self):
+        """ save changes to database """
         try:
            conn = connect_db()
            cur = conn.cursor()
-           print('connected...')
            habit_data = [
                (self.habits_id,self.habit, self.description, self.period, self.duration, self.created, self.closed, self.last_completion_date, self.is_template)
            ]
@@ -112,27 +98,5 @@ class Habit:
             conn.close()
         except ConnectionError as ex:
             print(ex)
-
-
-# def show_all_habits():
-#     table_format = 'fancy_outline'
-#     first_row = ['id', 'name', 'description', 'period', 'duration in days']
-#     try:
-#         conn = connect_db()
-#         cur = conn.cursor()
-#         rs = cur.execute(
-#             """ SELECT DISTINCT h.habits_id,h.name,h.description,p.name,duration FROM habits as h
-#             INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE ORDER BY habits_id ASC """)
-#     except ConnectionError as ex:
-#         print(ex)
-#
-#     rows = list(rs.fetchall())
-#     print(tabulate(rows, headers=first_row, tablefmt=table_format))
-
-
-
-
-
-
 
 

@@ -30,11 +30,18 @@ You can create a new individual habit by typing <<< habit new >>> with the follo
 for example <<< habit new -n "dentist" -d "have my teeth checked" -p 4 >>> use double quotes for the string parameters
 
 or copy a habit from a example habit using</br>
-TODO
+habit new-from-template </br>
 
 2.2 complete a habit today </br>
 List all habits to check the ID of your habits. <<< habit show-all >>> </br>
 To complete a habit type <<< habit mark-completed id >>> change id with the id of the habit you completed today
+
+2.3 Show all habits </br>
+To show all habits type <<< habit all-habits >>> </br>
+
+2.4 Delete a habit </br>
+To delete a habit type <<< habit delete id >>> </br>
+change id with the id of the habit you want to delete </br>
 
 3 Analytics </br>
 In the analytics module you can anlyse your activities. </br>

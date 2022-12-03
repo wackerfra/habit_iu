@@ -16,7 +16,7 @@ def connect_db():
 
     return conn
 
-
+# Manage the click group and subcommands
 @click.group
 def main_cli():
     pass
@@ -42,7 +42,13 @@ def main_cli():
     default=1,
     help="1=daily, 2=weekly, 3=monthly, 4=yearly"
 )
-def new_habit(name, description, period):
+@click.option(
+    "--duration",
+    "-dur",
+    default=60,
+    help="How long should the habit be tracked in days"
+)
+def new_habit(name, description, period, duration):
     """ create a new custom habit.
 
     :param name:
@@ -54,7 +60,7 @@ def new_habit(name, description, period):
     :return:
     :rtype:
     """
-    new = ha.Habit(name, description, period)
+    new = ha.Habit(name, description, period, duration)
     new.save_to_db()
 @click.command(name='new-from-template')
 def new_template():
@@ -105,6 +111,7 @@ def new_template():
 @click.command(name='all-habits')
 def show_all():
     """ show all habits in the database  """
+
     table_format = 'fancy_outline'
     first_row = ['id', 'name', 'description', 'period', 'duration in days']
     try:
@@ -115,10 +122,13 @@ def show_all():
             INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE AND is_template == FALSE 
             ORDER BY habits_id ASC """)
     except ConnectionError as ex:
+        conn.close()
         print(ex)
 
     rows = list(rs.fetchall())
     print(tabulate(rows, headers=first_row, tablefmt=table_format))
+    conn.close()
+
 @click.command(name='mark-completed')
 @click.argument("hid", type=click.IntRange(1))
 def mark_done_today(hid):
@@ -132,7 +142,6 @@ def mark_done_today(hid):
     try:
         conn = connect_db()
         cur = conn.cursor()
-        # conn.row_factory = sqlite3.Row
         rs = cur.execute(
             """ SELECT * FROM habits WHERE  habits_id = ? ORDER BY last_completion_date DESC """, str(hid))
         rows = list(rs.fetchone())
@@ -156,11 +165,42 @@ def mark_done_today(hid):
         conn.close()
         print(ex)
 
+@click.command(name='delete')
+@click.argument("hid", type=click.IntRange(1))
+def delete_habit(hid):
+    """
+     Delete a habit from DATABASE
+
+    :param hid:
+    :type hid:
+    :return:
+    :rtype:
+    """
+    if hid is None or hid <= 0:
+        raise ValueError('Please enter a valid habit ID')
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+        cur.execute(""" DELETE FROM habits WHERE habits_id = ? AND is_template == FALSE""", str(hid))
+        conf = input(f'Are you sure you want to delete the habit with ID {hid} ? (y/n)')
+        if conf == 'y':
+            conn.commit()
+            print(f'Habit with ID {hid} has been deleted.')
+        else:
+            conn.rollback()
+            print('Action cancelled.')
+        conn.close()
+    except sqlite3.Error as ex:
+        conn.close()
+        print(ex)
+
+
+# add commands to the click-group
 main_cli.add_command(show_all)
 main_cli.add_command(new_habit)
 main_cli.add_command(new_template)
 main_cli.add_command(mark_done_today)
 main_cli.add_command(analytic_group)
+main_cli.add_command(delete_habit)
 
-# if __name__ == '__main__':
-#     main_cli()
+

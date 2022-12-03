@@ -5,5 +5,6 @@ HabitTrackerIU.egg-info/PKG-INFO
 HabitTrackerIU.egg-info/SOURCES.txt
 HabitTrackerIU.egg-info/dependency_links.txt
 HabitTrackerIU.egg-info/entry_points.txt
+HabitTrackerIU.egg-info/habit.db
 HabitTrackerIU.egg-info/requires.txt
 HabitTrackerIU.egg-info/top_level.txt
