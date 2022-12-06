@@ -3,19 +3,20 @@ import sqlite3
 
 
 def connect_db():
-        try:
-            conn = sqlite3.connect('habit.db')
+    try:
+        conn = sqlite3.connect('habit.db')
 
-        except ConnectionError as ex:
-            conn = None
-            print(ex)
+    except ConnectionError as ex:
+        conn = None
+        print(ex)
 
-        return conn
+    return conn
+
 
 class Habit:
-    periods = {1:'daily', 2:'weekly', 3:'monthly', 4:'yearly'}
+    periods = {1: 'daily', 2: 'weekly', 3: 'monthly', 4: 'yearly'}
 
-    def __init__(self, habit, description, period, duration=60,is_template=0):
+    def __init__(self, habit, description, period, duration=60, is_template=0):
 
         if habit is None or len(str(habit).strip()) == 0:
             raise ValueError('Habit can not be empty')
@@ -38,17 +39,38 @@ class Habit:
         self.habits_id = None
         self.habits_id = self.get_habits_id()
 
-        # check if the Habit is still open
-        status = self.check_duration()
-        print(status)
+
+    @staticmethod
+    def get_instance(hid):
+        """ get the habit instance from the database """
+        period = None
+        try:
+            conn = connect_db()
+            cur = conn.cursor()
+            rs = cur.execute(f"SELECT * FROM habits WHERE habits_id = {hid} ORDER BY last_completion_date DESC")
+            rows = list(rs.fetchone())
+        except sqlite3.Error as ex:
+            print(ex)
+
+        # create a new habit instance
+        try:
+            habit = Habit(rows[1], rows[2], rows[3], rows[4], rows[8])
+            habit.habits_id = rows[0]
+            habit.created = rows[5]
+            habit.closed = rows[6]
+            habit.last_completion_date = rows[7]
+            return habit
+        except ValueError as ex:
+            print(ex)
+
     def get_habits_id(self):
         """ get the habits_id from the database """
 
         if self.habits_id is None:
             # connect to DB and get current record
             try:
-               conn = connect_db()
-               cur = conn.cursor()
+                conn = connect_db()
+                cur = conn.cursor()
             except ConnectionError as ex:
                 conn.close()
                 print(ex)
@@ -59,36 +81,68 @@ class Habit:
             return nxt
         return self.habits_id
 
+    def delete(self):
+        """ delete the habit from the database """
+        try:
+            conn = connect_db()
+            cur = conn.cursor()
+            cur.execute(f"DELETE FROM habits WHERE habits_id = {self.habits_id}")
+            conf = input(f'Are you sure you want to delete the habit {self.habit}? (y/n)\n')
+            if conf == 'y':
+                conn.commit()
+                print(f'Habit {self.habit} has been deleted.')
+            else:
+                conn.rollback()
+                print('Action cancelled.')
+        except ConnectionError as ex:
+            print(ex)
+            conn.close()
 
     def check_duration(self):
         """ check if the habit is still open """
+        date_format = "%Y-%m-%d %H:%M:%S.%f"
+        a = datetime.today()
+        b = datetime.strptime(self.created, date_format)
+        diff = a - b
 
-        diff = datetime.now() - self.created
-        diff_days = int(diff / timedelta(days=1))
-        if self.duration <= diff_days and self.closed == False:
+        # diff_days = int(diff / timedelta(days=1))
+        if self.duration <= diff.days and self.closed == False:
             self.closed = True
             conn = connect_db()
             cur = conn.cursor()
             try:
-               cur.execute(""" UPDATE habits SET closed = 1 WHERE habits_id = ?""", self.habits_id)
-               conn.commit()
-               # close connection
-               conn.close()
+                cur.execute(""" UPDATE habits SET closed = 1 WHERE habits_id = ?""", str(self.habits_id))
+                conn.commit()
+                # close connection
+                conn.close()
             except ConnectionError as ex:
                 conn.close()
                 print(ex)
-        return f'You have {self.duration - diff_days} days left to complete the task'
+        days_left = int(self.duration) - int(diff.days)
+        print(f'You have {days_left} days left to complete the task')
+        return diff.days  # return the number of days left
 
+    def complete_today(self):
+        """ mark the habit as completed """
+        if self.last_completion_date is not None:
+            if self.last_completion_date[0: 10] == datetime.now().strftime("%Y-%m-%d"):  # check if habit is already completed today
+                raise ValueError('The habit is already completed today')
+
+        self.check_duration()
+        self.is_template = False
+        self.last_completion_date = datetime.strptime(datetime.now().strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
+        self.save_to_db()
 
     def save_to_db(self):
         """ save changes to database """
         try:
-           conn = connect_db()
-           cur = conn.cursor()
-           habit_data = [
-               (self.habits_id,self.habit, self.description, self.period, self.duration, self.created, self.closed, self.last_completion_date, self.is_template)
-           ]
-           cur.executemany("""INSERT INTO habits  VALUES (?,?,?,?,?,?,?,?,?)""", habit_data)
+            conn = connect_db()
+            cur = conn.cursor()
+            habit_data = [
+                (self.habits_id, self.habit, self.description, self.period, self.duration, self.created, self.closed,
+                 self.last_completion_date, self.is_template)
+            ]
+            cur.executemany("""INSERT INTO habits  VALUES (?,?,?,?,?,?,?,?,?)""", habit_data)
         except ConnectionError as ex:
             print(ex)
 
@@ -98,5 +152,4 @@ class Habit:
             conn.close()
         except ConnectionError as ex:
             print(ex)
-
-
+        print(f'Habit {self.habit} has been saved to the database.')

@@ -1,5 +1,5 @@
 # habit_iu
-Welcome to my Habit tracker for the Iu International University of applied science for Data Science. 
+Welcome to my Habit tracker for the IU International University of applied science for Data Science. 
 
 1 Instalation
 

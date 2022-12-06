@@ -16,6 +16,7 @@ def connect_db():
 
     return conn
 
+
 # Manage the click group and subcommands
 @click.group
 def main_cli():
@@ -48,20 +49,32 @@ def main_cli():
     default=60,
     help="How long should the habit be tracked in days"
 )
-def new_habit(name, description, period, duration):
-    """ create a new custom habit.
+@click.option(
+    "--is_template",
+    "-t",
+    default=0,
+    help="Is this habit used as template? 1=yes, 0=no"
+)
+def new_habit(name, description, period, duration, is_template=0):
+    """     Create a new custom habit
 
     :param name:
-    :type name:
+    :type string:
     :param description:
-    :type description:
+    :type string:
     :param period:
-    :type period:
-    :return:
-    :rtype:
+    :type int:
+    :param duration:
+    :type int:
+    :param is_template:
+    :type boolean:
+    :return: new habit
+    :rtype: Habit
     """
-    new = ha.Habit(name, description, period, duration)
+    new = ha.Habit(name, description, period, duration, is_template)
     new.save_to_db()
+
+
 @click.command(name='new-from-template')
 def new_template():
     """ create a new habit from a template """
@@ -77,7 +90,6 @@ def new_template():
             INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE is_template == TRUE ORDER BY habits_id ASC """)
     except ConnectionError as ex:
         print(ex)
-
 
     rows = list(rs.fetchall())
     print(tabulate(rows, headers=first_row, tablefmt=table_format))
@@ -95,7 +107,7 @@ def new_template():
                         period = 3
                     case 'yearly':
                         period = 4
-                new = ha.Habit(row[1], row[2], period)
+                new = ha.Habit(row[1], row[2], period, is_template=0)
                 new.save_to_db()
                 print("Habit created.")
                 created = True
@@ -107,6 +119,7 @@ def new_template():
         print('ID not found. \n' + ex)
     if created == False:
         print("Habit ID not found. \nPlease try again.")
+
 
 @click.command(name='all-habits')
 def show_all():
@@ -129,6 +142,7 @@ def show_all():
     print(tabulate(rows, headers=first_row, tablefmt=table_format))
     conn.close()
 
+
 @click.command(name='mark-completed')
 @click.argument("hid", type=click.IntRange(1))
 def mark_done_today(hid):
@@ -139,59 +153,32 @@ def mark_done_today(hid):
     :return:
     :rtype:
     """
-    try:
-        conn = connect_db()
-        cur = conn.cursor()
-        rs = cur.execute(
-            """ SELECT * FROM habits WHERE  habits_id = ? ORDER BY last_completion_date DESC """, str(hid))
-        rows = list(rs.fetchone())
-    except sqlite3.Error as ex:
-        conn.close()
-        print(ex)
+    if hid is None or hid <= 0:
+        raise ValueError('Please enter a valid habit ID')
 
     try:
-        if rows[7] is not None:
-            if rows[7][0: 10] == datetime.now().strftime("%Y-%m-%d") :
-                raise ValueError('The habit is already completed today')
-        rows[7] = datetime.strptime(datetime.now().strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
-        cur.executemany("""INSERT INTO habits  VALUES (?,?,?,?,?,?,?,?,?)""", [rows])
-        conn.commit()
-        print(f'You have completed the habit {rows[1]}')
-        conn.close()
-    except sqlite3.Error as ex:
-        conn.close()
+        hab = ha.Habit.get_instance(hid)
+        hab.complete_today()
+    except Exception as ex:
         print(ex)
-    except ValueError as ex:
-        conn.close()
-        print(ex)
+
 
 @click.command(name='delete')
 @click.argument("hid", type=click.IntRange(1))
 def delete_habit(hid):
     """
-     Delete a habit from DATABASE
+     Delete a habit from Database
 
     :param hid:
-    :type hid:
-    :return:
-    :rtype:
-    """
+    :type int:
+      """
     if hid is None or hid <= 0:
         raise ValueError('Please enter a valid habit ID')
+
     try:
-        conn = connect_db()
-        cur = conn.cursor()
-        cur.execute(""" DELETE FROM habits WHERE habits_id = ? AND is_template == FALSE""", str(hid))
-        conf = input(f'Are you sure you want to delete the habit with ID {hid} ? (y/n)')
-        if conf == 'y':
-            conn.commit()
-            print(f'Habit with ID {hid} has been deleted.')
-        else:
-            conn.rollback()
-            print('Action cancelled.')
-        conn.close()
-    except sqlite3.Error as ex:
-        conn.close()
+        hab = ha.Habit.get_instance(hid)
+        hab.delete()
+    except ValueError as ex:
         print(ex)
 
 
@@ -202,5 +189,3 @@ main_cli.add_command(new_template)
 main_cli.add_command(mark_done_today)
 main_cli.add_command(analytic_group)
 main_cli.add_command(delete_habit)
-
-

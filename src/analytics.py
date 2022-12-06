@@ -56,7 +56,8 @@ def show_all_activities():
         cur = get_cursor()
         rs = cur.execute(
             """ SELECT  h.habits_id,h.name,h.description,p.name,h.duration, h.last_completion_date FROM habits as h 
-            INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE ORDER BY habits_id ASC, last_completion_date DESC """)
+            INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE 
+            ORDER BY habits_id ASC, last_completion_date DESC """)
 
     except ConnectionError as ex:
         print(ex)
@@ -72,24 +73,26 @@ def longest_streak_all():
     # define output format
     dateformat = "%Y-%m-%d %H:%M:%S"
     streak = 1
-    longest = 1
+    longest = 0
     h_name = None
     max_habit = None
     try:
         cur = get_cursor()
         rs = cur.execute(
-            """ SELECT habits_id, name,periods_fk, last_completion_date FROM habits WHERE last_completion_date not null ORDER BY habits_id ASC """)
+            """ SELECT habits_id, name,periods_fk, last_completion_date FROM habits WHERE last_completion_date not null 
+            ORDER BY habits_id ASC, last_completion_date ASC """)
         rows = rs.fetchall()
     except sqlite3.Error as ex:
         print(ex)
 
     for row in rows:
         # helping variables
-        first_compl = row[3]
         habit_name = row[1]
         period = row[2]
         if habit_name != h_name:  # if new habit
             streak = 1
+            first_compl = row[3]
+
         if streak > longest:  # if new longest streak
             longest = streak
             max_habit = h_name
@@ -99,6 +102,7 @@ def longest_streak_all():
                 current = datetime.strptime(row[3], dateformat)
                 delta = current - first
                 h_name = habit_name
+                print(f"delta: {delta.days}")
                 if delta.days <= 1:
                     streak += 1
                 else:
@@ -152,8 +156,9 @@ def longest_streak_habit(habit_id):
         # database connection
         cur = get_cursor()
         rs = cur.execute(
-            """ SELECT habits_id, name,periods_fk, last_completion_date FROM habits WHERE habits_id = ? AND last_completion_date not null  """,
-            str(habit_id))
+            """ SELECT habits_id, name,periods_fk, last_completion_date FROM habits WHERE habits_id = ? 
+            AND last_completion_date not null ORDER BY last_completion_date ASC """, str((habit_id)))
+
         rows = rs.fetchall()
     except sqlite3.Error as ex:
         print(ex)
@@ -170,6 +175,7 @@ def longest_streak_habit(habit_id):
                 first = datetime.strptime(first_compl, dateformat)
                 current = datetime.strptime(row[3], dateformat)
                 delta = current - first
+                print(f"delta: {delta.days}")
                 if delta.days <= 1:
                     streak += 1
                 else:
@@ -209,7 +215,13 @@ def longest_streak_habit(habit_id):
 @click.command(name='periodicy')
 @click.argument("period", type=click.IntRange(1, 4))
 def same_periodicy(period):
-    """list all habits with the same periodicy"""
+    """list all habits with the same periodicy
+
+    1 = daily
+    2 = weekly
+    3 = monthly
+    4 = yearly
+    """
 
     # define output format
     table_format = 'fancy_outline'
