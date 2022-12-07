@@ -161,6 +161,7 @@ def mark_done_today(hid):
         hab.complete_today()
     except Exception as ex:
         print(ex)
+        print('- Please use "habit all-habits" and try again.')
 
 
 @click.command(name='delete')

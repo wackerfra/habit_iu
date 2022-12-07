@@ -72,7 +72,7 @@ def longest_streak_all():
 
     # define output format
     dateformat = "%Y-%m-%d %H:%M:%S"
-    streak = 1
+    streak = 0
     longest = 0
     h_name = None
     max_habit = None
@@ -90,10 +90,10 @@ def longest_streak_all():
         habit_name = row[1]
         period = row[2]
         if habit_name != h_name:  # if new habit
-            streak = 1
+            streak = 0
             first_compl = row[3]
 
-        if streak > longest:  # if new longest streak
+        if streak >= longest:  # if new longest streak
             longest = streak
             max_habit = h_name
         match period:
@@ -101,10 +101,12 @@ def longest_streak_all():
                 first = datetime.strptime(first_compl, dateformat)
                 current = datetime.strptime(row[3], dateformat)
                 delta = current - first
+                first_compl = row[3]
                 h_name = habit_name
-                print(f"delta: {delta.days}")
                 if delta.days <= 1:
                     streak += 1
+                    if streak >= longest:
+                        longest = streak
                 else:
                     streak = 0
                     continue
@@ -112,9 +114,12 @@ def longest_streak_all():
                 first = datetime.strptime(first_compl, dateformat)
                 current = datetime.strptime(row[3], dateformat)
                 delta = current - first
+                first_compl = row[3]
                 h_name = habit_name
                 if delta.days <= 7:
                     streak += 1
+                    if streak >= longest:
+                        longest = streak
                 else:
                     streak = 0
                     continue
@@ -122,9 +127,12 @@ def longest_streak_all():
                 first = datetime.strptime(first_compl, dateformat)
                 current = datetime.strptime(row[3], dateformat)
                 delta = current - first
+                first_compl = row[3]
                 h_name = habit_name
                 if delta.days <= 30:
                     streak += 1
+                    if streak >= longest:
+                        longest = streak
                 else:
                     streak = 0
                     continue
@@ -132,9 +140,12 @@ def longest_streak_all():
                 first = datetime.strptime(first_compl, dateformat)
                 current = datetime.strptime(row[3], dateformat)
                 delta = current - first
+                first_compl = row[3]
                 h_name = habit_name
                 if delta.days <= 365:
                     streak += 1
+                    if streak >= longest:
+                        longest = streak
                 else:
                     streak = 0
                     continue
@@ -144,40 +155,42 @@ def longest_streak_all():
 
 
 @click.command(name='streak')
-@click.argument('habit_id', type=click.IntRange(1))
+@click.argument('habit_id', type=click.IntRange(1, 100))
 def longest_streak_habit(habit_id):
     """display longest streak of a habit"""
 
     # define output format
     dateformat = "%Y-%m-%d %H:%M:%S"
-    streak = 1
-    longest = 1
+    streak = 0
+    longest = 0
     try:
         # database connection
         cur = get_cursor()
-        rs = cur.execute(
-            """ SELECT habits_id, name,periods_fk, last_completion_date FROM habits WHERE habits_id = ? 
-            AND last_completion_date not null ORDER BY last_completion_date ASC """, str((habit_id)))
-
-        rows = rs.fetchall()
+        rs = cur.execute(f""" SELECT habits_id, name,periods_fk, last_completion_date FROM habits WHERE habits_id = {habit_id}
+                    AND last_completion_date not null ORDER BY last_completion_date ASC """)
     except sqlite3.Error as ex:
         print(ex)
+    try:
+        rows = rs.fetchall()
+    except Exception as ex:
+        print(ex)
+
     data = rows[0]  # get first row
     period = data[2]
     first_compl = data[3]
     habit_name = data[1]
 
     for row in rows:  # loop through all rows
-        if streak > longest:
-            longest = streak
         match period:  # check period
             case 1:  # daily
                 first = datetime.strptime(first_compl, dateformat)
                 current = datetime.strptime(row[3], dateformat)
                 delta = current - first
-                print(f"delta: {delta.days}")
+                first_compl = row[3]
                 if delta.days <= 1:
                     streak += 1
+                    if streak >= longest:
+                        longest = streak
                 else:
                     streak = 0
                     continue
@@ -185,8 +198,11 @@ def longest_streak_habit(habit_id):
                 first = datetime.strptime(first_compl, dateformat)
                 current = datetime.strptime(row[3], dateformat)
                 delta = current - first
+                first_compl = row[3]
                 if delta.days <= 7:
                     streak += 1
+                    if streak >= longest:
+                        longest = streak
                 else:
                     streak = 0
                     continue
@@ -194,8 +210,11 @@ def longest_streak_habit(habit_id):
                 first = datetime.strptime(first_compl, dateformat)
                 current = datetime.strptime(row[3], dateformat)
                 delta = current - first
+                first_compl = row[3]
                 if delta.days <= 30:
                     streak += 1
+                    if streak >= longest:
+                        longest = streak
                 else:
                     streak = 0
                     continue
@@ -203,8 +222,11 @@ def longest_streak_habit(habit_id):
                 first = datetime.strptime(first_compl, dateformat)
                 current = datetime.strptime(row[3], dateformat)
                 delta = current - first
+                first_compl = row[3]
                 if delta.days <= 365:
                     streak += 1
+                    if streak >= longest:
+                        longest = streak
                 else:
                     streak = 0
                     continue
@@ -228,13 +250,17 @@ def same_periodicy(period):
     first_row = ['id', 'name', 'description', 'period', 'duration']
     try:
         cur = get_cursor()
-        rs = cur.execute(""" SELECT DISTINCT habits_id,name,description,periods_fk,duration FROM habits 
-        WHERE periods_fk = ?""", str(period))
+        rs = cur.execute(""" SELECT DISTINCT h.habits_id,h.name,h.description,h.periods_fk,p.name, h.duration FROM habits as h 
+            INNER JOIN periods as p ON h.periods_fk = p.periods_id WHERE h.periods_fk = ?""", str(period))
     except ConnectionError as ex:
         print(ex)
 
     rows = list(rs.fetchall())
-    print(tabulate(rows, headers=first_row, tablefmt=table_format))
+    print(rows)
+    result = []
+    for row in rows:
+        result.append([row[0], row[1], row[2], row[4], row[5]])
+    print(tabulate(result, headers=first_row, tablefmt=table_format))
 
 
 # define the group for click commands
