@@ -3,6 +3,7 @@ import sqlite3
 
 
 def connect_db():
+    """Connect to the database"""
     try:
         conn = sqlite3.connect('habit.db')
 
@@ -111,7 +112,7 @@ class Habit:
             conn = connect_db()
             cur = conn.cursor()
             try:
-                cur.execute(""" UPDATE habits SET closed = 1 WHERE habits_id = ?""", str(self.habits_id))
+                cur.execute(f""" UPDATE habits SET closed = 1 WHERE habits_id = {self.habits_id}""")
                 conn.commit()
                 # close connection
                 conn.close()

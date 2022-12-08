@@ -174,8 +174,12 @@ def longest_streak_habit(habit_id):
         rows = rs.fetchall()
     except Exception as ex:
         print(ex)
-
-    data = rows[0]  # get first row
+    try:
+        data = rows[0]  # get first row
+    except IndexError as ex:
+        print(ex)
+        print('No habit with this id')
+        return
     period = data[2]
     first_compl = data[3]
     habit_name = data[1]
