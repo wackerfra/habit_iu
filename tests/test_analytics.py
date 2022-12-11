@@ -25,7 +25,7 @@ def test_longest_streak_all():
     runner = CliRunner()
     result = runner.invoke(longest_streak_all)
     assert result.exit_code == 0
-    assert result.output == 'The longest streak is for your habit sleep with 36 times\n'
+    assert result.output == 'The longest streak is for your habit sleep with 34 times\n'
 
 
 def test_longest_streak():
@@ -41,20 +41,21 @@ def test_same_periodicy_day():
     assert result.exit_code == 0
     assert result.output.find('Coffee') > 0
 
+
+# sad path
+
+def test_longest_streak_fail():
+    runner = CliRunner()
+    result = runner.invoke(longest_streak_habit, ['99'])
+    assert 'No habit with this id\n' in result.output
+
 #
-# # sad path
-#
-# def test_longest_streak_fail():
-#     runner = CliRunner()
-#     result = runner.invoke(longest_streak_habit, ['99'])
-#     assert result.exit_code != 0
-# #
-#
-# def test_same_periodicy_fail(period=5):
-#     with pytest.raises(ValueError):
-#         same_periodicy(5)
-#
-# def test_longest_streak_all_fail():
-#     with pytest.raises(ValueError):
-#         longest_streak_all(99)
+def test_same_periodicy_fail():
+    runner = CliRunner()
+    result = runner.invoke(same_periodicy, ['5'])
+    assert result.exit_code != 0
+    # assert SystemExit == click.exceptions.BadParameter
+
+
+
 

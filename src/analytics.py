@@ -178,15 +178,20 @@ def longest_streak_habit(habit_id):
                     AND last_completion_date not null ORDER BY last_completion_date ASC """)
     except sqlite3.Error as ex:
         print(ex)
+        cur.close()
+        return None
     try:
         rows = rs.fetchall()
     except Exception as ex:
         print(ex)
+        cur.close()
+        return None
     try:
         data = rows[0]  # get first row
     except IndexError as ex:
         print(ex)
         print('No habit with this id')
+        cur.close()
         return
     period = data[2]
     first_compl = data[3]
