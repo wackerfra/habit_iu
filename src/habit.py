@@ -52,6 +52,8 @@ class Habit:
             rows = list(rs.fetchone())
         except sqlite3.Error as ex:
             print(ex)
+        except TypeError as ex:
+            raise ValueError('Habit not found')
 
         # create a new habit instance
         try:

@@ -42,7 +42,8 @@ def show_all_habits():
         print(ex)
 
     rows = list(rs.fetchall())
-    print(tabulate(rows, headers=first_row, tablefmt=table_format))
+    cur.close()
+    click.echo(tabulate(rows, headers=first_row, tablefmt=table_format))
 
 
 @click.command(name='list-all-activities')
@@ -63,7 +64,8 @@ def show_all_activities():
         print(ex)
 
     rows = list(rs.fetchall())
-    print(tabulate(rows, headers=first_row, tablefmt=table_format))
+    cur.close()
+    click.echo(tabulate(rows, headers=first_row, tablefmt=table_format))
 
 
 @click.command(name='streak-all')
@@ -84,6 +86,9 @@ def longest_streak_all():
         rows = rs.fetchall()
     except sqlite3.Error as ex:
         print(ex)
+        cur.close()
+    except TypeError as ex:
+        raise ValueError('No habit found')
 
     for row in rows:
         # helping variables
@@ -151,7 +156,9 @@ def longest_streak_all():
                     continue
 
     # Output
-    print(f'The longest streak is for your habit {max_habit} with {longest} times')
+    cur.close()
+    click.echo(f'The longest streak is for your habit {max_habit} with {longest} times')
+
 
 
 @click.command(name='streak')
@@ -166,7 +173,8 @@ def longest_streak_habit(habit_id):
     try:
         # database connection
         cur = get_cursor()
-        rs = cur.execute(f""" SELECT habits_id, name,periods_fk, last_completion_date FROM habits WHERE habits_id = {habit_id}
+        rs = cur.execute(
+            f""" SELECT habits_id, name,periods_fk, last_completion_date FROM habits WHERE habits_id = {habit_id}
                     AND last_completion_date not null ORDER BY last_completion_date ASC """)
     except sqlite3.Error as ex:
         print(ex)
@@ -235,7 +243,9 @@ def longest_streak_habit(habit_id):
                     streak = 0
                     continue
     # Output
+    cur.close()
     print(f'The longest streak for your habit {habit_name} is {longest} times')
+
 
 
 @click.command(name='periodicy')
@@ -260,11 +270,12 @@ def same_periodicy(period):
         print(ex)
 
     rows = list(rs.fetchall())
-    print(rows)
     result = []
     for row in rows:
         result.append([row[0], row[1], row[2], row[4], row[5]])
-    print(tabulate(result, headers=first_row, tablefmt=table_format))
+
+    cur.close()
+    click.echo(tabulate(result, headers=first_row, tablefmt=table_format))
 
 
 # define the group for click commands
