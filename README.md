@@ -10,7 +10,7 @@ Open a Terminal session at the folder you downloaded the habit app. </br>
 Check that the right Python version is running by typing "python --version". </br>
 The response should be Python 3.10.X or above
 
-Additionally pip is required to install additional packages. </br>
+Additionally, pip is required to install additional packages. </br>
 To install pip follow the instructions on https://pip.pypa.io/en/stable/installation/
 
 Run: <<< pip install . >>> (Don't ignore the whitespace and dot)  </br>
@@ -19,7 +19,7 @@ This will install all additional packages required for the app. </br>
 
 2 Start the app </br>
 Open a Terminal session on the directory the app is stored. 
-If you are on a Windows mashine make sure to use "cmd" and not a powershell. 
+If you are on a Windows machine make sure to use "cmd" and not a powershell. 
 Start the app by typing <<< habit >>>
 
 2.1 Create a new habit </br>
@@ -33,7 +33,7 @@ or copy a habit from a example habit using</br>
 habit new-from-template </br>
 
 2.2 complete a habit today </br>
-List all habits to check the ID of your habits. <<< habit show-all >>> </br>
+List all habits to check the ID of your habits. <<< habit all-habits >>> </br>
 To complete a habit type <<< habit mark-completed id >>> change id with the id of the habit you completed today
 
 2.3 Show all habits </br>
@@ -46,11 +46,11 @@ change id with the id of the habit you want to delete </br>
 3 Analytics </br>
 In the analytics module you can anlyse your activities. </br>
 To get an overview of the possible commands type <<< habit analytics >>> </br>
-all-habits - list of all active habits </br>
-list-all-activities - list of all entries of completed tasks </br>
-periodiciy followed by the periodicy number 1-4 lists all habits with the same periodicy </br>
-streak followed by the habit id lists the longest streak for this habit </br>
-streak-all list the longest streak of all habits </br>
+ - all-habits - list of all active habits </br>
+ - list-all-activities - list of all entries of completed tasks </br>
+ - periodiciy followed by the periodicy number 1-4 lists all habits with the same periodicy </br>
+ - streak followed by the habit id lists the longest streak for this habit </br>
+ - streak-all list the longest streak of all habits </br>
 
 Have fun and keep up the good progress
 
