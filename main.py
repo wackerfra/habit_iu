@@ -9,6 +9,10 @@ from src.analytics import analytic_group
 
 
 def connect_db():
+    """
+    Connect to the database
+    :return: connection
+    """
     try:
         conn = sqlite3.connect('habit.db')
     except ConnectionError as ex:
@@ -20,6 +24,7 @@ def connect_db():
 # Manage the click group and subcommands
 @click.group
 def main_cli():
+    """ defines the subcommand of click """
     pass
 
 
@@ -150,8 +155,7 @@ def mark_done_today(hid):
 
     :param hid:
     :type hid
-    :return:
-    :rtype:
+    :return: None
     """
     if hid is None or hid <= 0:
         raise ValueError('Please enter a valid habit ID')

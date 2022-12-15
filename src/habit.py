@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
 import sqlite3
+from datetime import datetime, timedelta
 
 
 def connect_db():
@@ -18,6 +18,19 @@ class Habit:
     periods = {1: 'daily', 2: 'weekly', 3: 'monthly', 4: 'yearly'}
 
     def __init__(self, habit, description, period, duration=60, is_template=0):
+        """
+        :param habit: name of the habit
+        :type habit: str
+        :param description: description of the habit
+        :type description: str
+        :param period: period of the habit
+        :type period: int
+        :param duration: duration of the habit
+        :type duration: int
+        :param is_template: is the habit a template
+        :type is_template: bool
+
+        """
 
         if habit is None or len(str(habit).strip()) == 0:
             raise ValueError('Habit can not be empty')

@@ -1,5 +1,7 @@
-import src.habit as habit
 import pytest
+
+import src.habit as habit
+
 
 # happy path
 def test_connect_db():

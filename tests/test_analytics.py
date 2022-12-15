@@ -1,8 +1,8 @@
-from src.analytics import *
 import click
+import pytest
 from click.testing import CliRunner
 
-import pytest
+from src.analytics import *
 
 
 # happy path
