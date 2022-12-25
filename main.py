@@ -1,6 +1,5 @@
 import sqlite3
 from datetime import datetime
-
 import click
 from tabulate import tabulate
 
@@ -22,7 +21,7 @@ def connect_db():
 
 
 # Manage the click group and subcommands
-@click.group
+@click.group(name="habit")
 def main_cli():
     """ defines the subcommand of click """
     pass
@@ -194,3 +193,7 @@ main_cli.add_command(new_template)
 main_cli.add_command(mark_done_today)
 main_cli.add_command(analytic_group)
 main_cli.add_command(delete_habit)
+
+
+if __name__ == '__main__':
+    main_cli()

@@ -121,7 +121,6 @@ class Habit:
         b = datetime.strptime(self.created, date_format)
         diff = a - b
 
-        # diff_days = int(diff / timedelta(days=1))
         if self.duration <= diff.days and self.closed == False:
             self.closed = True
             conn = connect_db()
@@ -131,6 +130,7 @@ class Habit:
                 conn.commit()
                 # close connection
                 conn.close()
+                print(f'Habit {self.habit} has been closed.')
             except ConnectionError as ex:
                 conn.close()
                 print(ex)

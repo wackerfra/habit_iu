@@ -20,7 +20,8 @@ This will install all additional packages required for the app. </br>
 
 <h2>2 Start the app</h2> </br>
 Open a Terminal session on the directory the app is stored. 
-If you are on a Windows machine make sure to use "cmd" and not a powershell. 
+If you are on a Windows machine make sure to use "cmd" and not a powershell. </br>
+Activate the virtual environment by typing <code>venv\Scripts\activate.bat</code> </br>
 Start the app by typing </br>
 <code>habit</code>
 
