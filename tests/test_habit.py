@@ -23,7 +23,7 @@ def test_get_habits_id():
 
 def test_check_duration():
     habit1 = habit.Habit.get_instance(2)
-    assert habit1.check_duration() == 21
+    assert habit1.check_duration() == 35
 
 # def test_completed_today():
 #     habit1 = habit.Habit.get_instance(2)
