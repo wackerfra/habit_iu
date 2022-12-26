@@ -163,7 +163,7 @@ def longest_streak_all():
 @click.command(name='streak')
 @click.argument('habit_id', type=click.IntRange(1, 100))
 def longest_streak_habit(habit_id):
-    """display the longest streak of a habit"""
+    """show the longest streak of a habit"""
 
     # define output format
     dateformat = "%Y-%m-%d %H:%M:%S"

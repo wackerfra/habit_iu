@@ -80,7 +80,8 @@ class Habit:
             print(ex)
 
     def get_habits_id(self):
-        """ get the habits_id from the database """
+        """ Helper method to get the next habits_id from the database
+        or get the habits_id from the database if the habit already exists """
 
         if self.habits_id is None:
             # connect to DB and get current record
@@ -116,6 +117,7 @@ class Habit:
 
     def check_duration(self):
         """ check if the habit is still open """
+
         date_format = "%Y-%m-%d %H:%M:%S.%f"
         a = datetime.today()
         b = datetime.strptime(self.created, date_format)
