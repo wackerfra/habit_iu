@@ -36,7 +36,7 @@ or copy a habit from a example habit using</br>
 <code>habit new-from-template</code> </br>
 
 <h3>2.2 complete a habit today</h3> </br>
-List all habits to check the ID of your habits. <<< habit all-habits >>> </br>
+List all habits to check the ID of your habits. <code>habit all-habits</code> </br>
 To complete a habit type <code>habit mark-completed id</code>  change id with the id of the habit you completed today
 
 <h3>2.3 Show all habits</h3> </br>
