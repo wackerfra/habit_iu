@@ -55,6 +55,10 @@ To get an overview of the possible commands type <code>habit analytics</code> </
  - streak followed by the habit id lists the longest streak for this habit </br>
  - streak-all list the longest streak of all habits </br>
 
+<h2>4 Testing</h2> </br>
+To run the tests type <code>pytest tests/</code> </br>
+This will run all tests in the tests folder for habit.py and analytics.py</br>
+</br>
 Have fun and keep up the good progress
 
 

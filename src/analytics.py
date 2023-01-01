@@ -27,7 +27,7 @@ def analytic_group():
 
 @click.command(name='all-habits')
 def show_all_habits():
-    """list all habits"""
+    """list all active habits"""
 
     # define output format
     table_format = 'fancy_outline'
@@ -36,7 +36,7 @@ def show_all_habits():
         cur = get_cursor()
         rs = cur.execute(
             """ SELECT DISTINCT h.habits_id,h.name,h.description,p.name,h.duration FROM habits as h 
-            INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE ORDER BY habits_id ASC """)
+            INNER JOIN periods as p ON h.periods_fk = p.periods_id  WHERE closed == FALSE AND is_template == 0 ORDER BY habits_id ASC """)
     except ConnectionError as ex:
         print(ex)
 

@@ -46,7 +46,7 @@ class Habit:
 
         self.duration = duration
         self.created = datetime.now()
-        self.completed = False
+        # self.completed = False
         self.closed = False
         self.last_completion_date = None
         self.is_template = is_template
@@ -103,7 +103,7 @@ class Habit:
         try:
             conn = connect_db()
             cur = conn.cursor()
-            cur.execute(f"DELETE FROM habits WHERE habits_id = {self.habits_id}")
+            cur.execute(f"DELETE FROM habits WHERE habits_id = {self.habits_id} AND is_template = 0")
             conf = input(f'Are you sure you want to delete the habit {self.habit}? (y/n)\n')
             if conf == 'y':
                 conn.commit()

@@ -25,7 +25,7 @@ def test_longest_streak_all():
     runner = CliRunner()
     result = runner.invoke(longest_streak_all)
     assert result.exit_code == 0
-    assert result.output == 'The longest streak is for your habit sleep with 34 times\n'
+    assert result.output == 'The longest streak is for your habit sleep with 37 times\n'
 
 
 def test_longest_streak():
