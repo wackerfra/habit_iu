@@ -40,6 +40,7 @@ def show_all_habits():
     except ConnectionError as ex:
         print(ex)
 
+
     rows = list(rs.fetchall())
     cur.close()
     click.echo(tabulate(rows, headers=first_row, tablefmt=table_format))
