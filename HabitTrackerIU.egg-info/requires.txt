@@ -1,5 +1,0 @@
-click
-tabulate
-
-[tests]
-pytest
