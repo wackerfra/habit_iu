@@ -1,2 +1,5 @@
 /appmap.yml
-/test_habit.ipynb
+
+/build/
+/HabitTrackerIU.egg-info/
+/src/HabitTrackerIU.egg-info/

@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 def connect_db():
@@ -46,7 +46,6 @@ class Habit:
 
         self.duration = duration
         self.created = datetime.now()
-        # self.completed = False
         self.closed = False
         self.last_completion_date = None
         self.is_template = is_template
@@ -95,7 +94,7 @@ class Habit:
             nxt = rs.fetchone()[0]
             nxt += 1
             conn.close()
-            return nxt
+            return nxt # return the next habits_id
         return self.habits_id
 
     def delete(self):

@@ -253,15 +253,15 @@ def longest_streak_habit(habit_id):
 
 
 
-@click.command(name='periodicy')
+@click.command(name='periodicity')
 @click.argument("period", type=click.IntRange(1, 4))
 def same_periodicy(period):
-    """list all habits with the same periodicy
+    """list all habits with the same periodicity
 
-    1 = daily
-    2 = weekly
-    3 = monthly
-    4 = yearly
+    1 = daily \n
+    2 = weekly \n
+    3 = monthly \n
+    4 = yearly \n
     """
 
     # define output format

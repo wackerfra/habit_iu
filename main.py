@@ -1,5 +1,4 @@
 import sqlite3
-from datetime import datetime
 
 import click
 from tabulate import tabulate
@@ -76,8 +75,18 @@ def new_habit(name, description, period, duration, is_template=0):
     :return: new habit
     :rtype: Habit
     """
-    new = ha.Habit(name, description, period, duration, is_template)
-    new.save_to_db()
+    try:
+        new = ha.Habit(name, description, period, duration, is_template)
+    except ValueError as ex:
+        print(ex)
+        print("Please use the --help option to see the correct usage")
+        return
+
+    try:
+        new.save_to_db()
+    except sqlite3.IntegrityError as ex:
+        print(ex)
+        return
 
 
 @click.command(name='new-from-template')
@@ -123,7 +132,7 @@ def new_template():
     except ValueError as ex:
         print('ID not found. \n' + ex)
     if created == False:
-        print("Habit ID not found. \nPlease try again.")
+        print(f"Habit ID {userinput} not found. \nPlease try again.")
 
 
 @click.command(name='all-habits')
